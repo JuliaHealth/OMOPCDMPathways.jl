@@ -1,23 +1,39 @@
 using OMOPCDMPathways
-using Documenter
+using Documenter, DocumenterVitepress
 
 DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); recursive=true)
 
-makedocs(;
-    modules=[OMOPCDMPathways],
-    authors="Jay-sanjay <landgejay124@gmail.com> and contributors",
-    sitename="OMOPCDMPathways.jl",
-    format=Documenter.HTML(;
-        canonical="https://Jay-sanjay.github.io/OMOPCDMPathways.jl",
-        edit_link="main",
-        assets=String[],
-    ),
-    pages=[
+pgs=[
         "Home" => "index.md",
-    ],
+]
+
+fmt  = DocumenterVitepress.MarkdownVitepress(
+    repo="https://github.com/Jay-sanjay/OMOPCDMPathways.jl",
+    devurl = "dev",
+    # deploy_url = "yourgithubusername.github.io/OMOPCDMPathways.jl",
+    build_vitepress = false,
+)
+# )
+
+makedocs(;
+    modules = [OMOPCDMPathways],
+    authors = "Jay-sanjay <landgejay124@gmail.com> and contributors",
+    repo = "https://github.com/Jay-sanjay/OMOPCDMPathways.jl",
+    sitename = "OMOPCDMPathways.jl",
+    format = fmt,
+    pages= pgs,
+    warnonly = true,
 )
 
 deploydocs(;
-    repo="github.com/Jay-sanjay/OMOPCDMPathways.jl",
-    devbranch="main",
+    repo="https://github.com/Jay-sanjay/OMOPCDMPathways.jl",
+    target="build", # this is where Vitepress stores its output
+    branch = "gh-pages",
+    devbranch = "main",
+    push_preview = true,
 )
+
+
+"""
+To build docs locally run ths in the docs folder: npm run docs:dev
+"""
