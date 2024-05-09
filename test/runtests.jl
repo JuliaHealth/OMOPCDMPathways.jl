@@ -3,6 +3,7 @@ using Test
 
 @testset "OMOPCDMPathways.jl" begin
     # Write your tests here.
+    @test 2 + 2 == 4
     
     # Dummy tests
     @testset "Dummy tests" begin
