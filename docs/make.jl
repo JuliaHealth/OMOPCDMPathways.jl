@@ -5,10 +5,9 @@ DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); re
 
 pgs=[
     "Home" => "index.md",
-    
-    "tutorials.md",
-    "api.md",
-    "contributing.md"
+    "Tutorials" => "tutorials.md",
+    "Api" => "api.md",
+    "Contributing" => "contributing.md"
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
