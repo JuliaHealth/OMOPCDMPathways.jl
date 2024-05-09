@@ -5,4 +5,6 @@ function hello()
   "world"
 end
 
+export hello
+
 end
