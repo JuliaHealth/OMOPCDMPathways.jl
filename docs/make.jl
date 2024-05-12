@@ -1,5 +1,6 @@
 using OMOPCDMPathways
-using Documenter, DocumenterVitepress
+using Documenter
+using DocumenterVitepress
 
 DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); recursive=true)
 
@@ -17,11 +18,10 @@ fmt  = DocumenterVitepress.MarkdownVitepress(
     build_vitepress = false,
 )
 
-
 makedocs(;
     modules = [OMOPCDMPathways],
-    authors = "Jay-sanjay <landgejay124@gmail.com> and contributors",
-    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
+    authors = "Jay-sanjay <landgejay124@gmail.com>, Jacob Zelko <jacobszelko@gmail.com>, and contributors",
+    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl/blob/{commit}{path}#L{line}",
     sitename = "OMOPCDMPathways.jl",
     format = fmt,
     pages= pgs,
@@ -32,7 +32,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
+    repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
     target="build", # this is where Vitepress stores its output
     branch = "gh-pages",
     devbranch = "main",
