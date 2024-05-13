@@ -19,7 +19,7 @@ fmt  = DocumenterVitepress.MarkdownVitepress(
 )
 
 makedocs(;
-    modules = [OMOPCDMPathways]
+    modules = [OMOPCDMPathways],
     repo = Remotes.GitHub("JuliaHealth", "OMOPCDMPathways.jl"),
     authors = "Jay-sanjay <landgejay124@gmail.com>, Jacob Zelko <jacobszelko@gmail.com>, and contributors",
     sitename = "OMOPCDMPathways.jl",
