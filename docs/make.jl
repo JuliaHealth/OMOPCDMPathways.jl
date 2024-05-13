@@ -12,8 +12,9 @@ pgs=[
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
-    repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
+    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
     devbranch = "main",
+    deploy_url = "juliahealth.org/OMOPCDMPathways.jl"
     devurl = "dev"
 )
 
@@ -24,10 +25,6 @@ makedocs(;
     format = fmt,
     pages = pgs,
     warnonly = true,
-    draft = false,
-    source = "src",
-    build = "build",
-    checkdocs=:all
 )
 
 deploydocs(;
