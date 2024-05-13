@@ -2,7 +2,7 @@ using OMOPCDMPathways
 using Documenter
 using DocumenterVitepress
 
-# DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); recursive=true)
+DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); recursive=true)
 
 pgs=[
     "Home" => "index.md",
@@ -12,14 +12,15 @@ pgs=[
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
-    repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
+    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
     devbranch = "main",
     deploy_url = "juliahealth.org/OMOPCDMPathways.jl",
     devurl = "dev"
 )
 
 makedocs(;
-    modules = [OMOPCDMPathways],
+    modules = [OMOPCDMPathways]
+    repo = Remotes.GitHub("JuliaHealth", "OMOPCDMPathways.jl"),
     authors = "Jay-sanjay <landgejay124@gmail.com>, Jacob Zelko <jacobszelko@gmail.com>, and contributors",
     sitename = "OMOPCDMPathways.jl",
     format = fmt,
