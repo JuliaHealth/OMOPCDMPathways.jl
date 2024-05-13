@@ -25,6 +25,10 @@ makedocs(;
     format = fmt,
     pages = pgs,
     warnonly = true,
+    draft = false,
+    source = "src",
+    build = "build",
+    checkdocs=:all
 )
 
 deploydocs(;
