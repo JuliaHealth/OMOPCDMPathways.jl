@@ -2,9 +2,9 @@
 CurrentModule = OMOPCDMPathways
 ```
 
-# OMOPCDMPathways
+# Welcome to the `OMOPCDMPathways.jl` Docs! 👋
 
-Documentation for [OMOPCDMPathways](https://github.com/Jay-sanjay/OMOPCDMPathways.jl).
+Documentation for [OMOPCDMPathways](https://github.com/JuliaHealth/OMOPCDMPathways.jl).
 
 ```@index
 ```
