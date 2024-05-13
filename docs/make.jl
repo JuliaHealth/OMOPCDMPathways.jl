@@ -15,7 +15,7 @@ fmt  = DocumenterVitepress.MarkdownVitepress(
     repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
     devbranch = "main",
     devurl = "dev",
-    build_vitepress = false,
+    build_vitepress = false
 )
 
 makedocs(;
@@ -27,7 +27,7 @@ makedocs(;
     warnonly = true,
     draft = false,
     source = "src",
-    build = "build"
+    build = "build",
     checkdocs=:all
 )
 
@@ -36,5 +36,5 @@ deploydocs(;
     target="build", # this is where Vitepress stores its output
     devbranch = "main",
     branch = "gh-pages",
-    push_preview = true,
+    push_preview = true
 )
