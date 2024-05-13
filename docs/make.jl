@@ -12,7 +12,7 @@ pgs=[
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
-    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
+    repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
     devbranch = "main",
     deploy_url = "juliahealth.org/OMOPCDMPathways.jl",
     devurl = "dev"
