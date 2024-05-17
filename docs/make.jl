@@ -9,7 +9,6 @@ pgs=[
     "Tutorials" => [
             "Tutorials" => "tutorials.md",
             "Beginner Tutorial 🐣" => "beginner_tutorial.md",
-            "Using OMOPCDMCohortCreator with R 🏴‍☠️" => "using_omopcdmcohortcreator_with_r.md",
             ],
     "Api" => "api.md",
     "Contributing" => "contributing.md"
