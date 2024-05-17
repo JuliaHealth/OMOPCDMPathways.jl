@@ -1,1 +1,0 @@
-# Using OMOPCDMPathways with R 🏴‍☠️
