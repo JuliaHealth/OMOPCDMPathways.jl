@@ -11,6 +11,8 @@ That'll save you from doing work that we may not support for OMOPCDMPathways.
 
 ## 2. Fork the repo to your account 🍴
 
+A complete step-by-step procedure to fork any repository can be found [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
+
 ## 3. Create a branch based on what you are developing 🌳
 
 Before making a branch, make sure to check that you are even with master via the following commands within your fork:
