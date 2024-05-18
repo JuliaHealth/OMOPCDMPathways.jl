@@ -4,9 +4,7 @@ authors = ["Jay-sanjay <landgejay124@gmail.com> and contributors"]
 version = "0.0.1"
 
 [deps]
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-DocumenterVitepress = "4710194d-e776-4893-9690-8d956a29c365"
-LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
+FunSQL = "cf6cc811-59f4-4a10-b258-a8547a8f6407"
 
 [compat]
 DocumenterVitepress = "0.0.19"
