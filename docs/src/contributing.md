@@ -6,7 +6,7 @@ The general workflow we expect contributors to adhere to is as follows:
 
 ## 1. Create an Issue about the Problem 📝
 
-If you want to add functionality or to work on a bug you found, open an issue first.
+If you want to [add functionality] or to work on a bug you found, open an issue first.
 That'll save you from doing work that we may not support for OMOPCDMPathways.
 
 ## 2. Fork the repo to your account 🍴
@@ -20,7 +20,7 @@ Before making a branch, make sure to check that you are even with master via the
 ```sh
 git fetch origin
 git checkout master
-git merge --ff-only origin/master
+git merge --ff-only origin/main
 ```
 
 > The `--ff-only` flag will "fast forward" to newer commits. It will not create new merge commits.
