@@ -38,10 +38,6 @@ module OMOPCDMPathways
 
   end
 
-  function hello()
-    "world"
-  end
-
-  export MakeTables, hello
+  export MakeTables
 
 end

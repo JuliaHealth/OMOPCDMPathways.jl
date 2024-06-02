@@ -31,8 +31,9 @@ sqlite_conn = SQLite.DB(Eunomia())
 GenerateDatabaseDetails(:sqlite, "main")
 GenerateTables(sqlite_conn)
 
-@testset "OMOPCDMPathways.jl" begin
-    # Write your tests here.
-    @test hello() == "world"
-    
+@testset "OMOPCDMPathways" begin
+	@testset "Data-Preprocessing" begin
+		include("Data-Preprocessing/preprocessing.jl")
+	end
 end
+
