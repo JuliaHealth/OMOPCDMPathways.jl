@@ -40,4 +40,5 @@ module OMOPCDMPathways
 
   export MakeTables
 
+include("preprocessing.jl")
 end
