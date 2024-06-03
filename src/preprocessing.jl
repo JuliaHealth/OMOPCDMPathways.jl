@@ -1,6 +1,17 @@
 using Dates
 
 function Dummy(
+    drug_exposure_ids,
+    conn;
+    tab = drug_exposure 
+)
+
+    df = DBInterface.execute(conn, Dummy(drug_exposure_ids; tab=tab)) |> DataFrame
+
+    return df
+end
+
+function Dummy(
     drug_exposure_ids;
     tab = drug_exposure
 )
