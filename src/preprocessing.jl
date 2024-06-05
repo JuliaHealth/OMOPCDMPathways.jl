@@ -26,4 +26,29 @@ function Dummy(
 
 end
 
-export Dummy
+
+"""
+TODO: Add Doc-Strings.
+"""
+function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
+
+    # Construct the SQL query
+    sql = From(tab) |>
+            Where(Fun.in(Get.cohort_definition_id, cohort_id...)) |>
+            Select(Get.cohort_definition_id, Get.subject_id, Get.cohort_start_date) |>
+            q -> render(q, dialect=dialect)
+
+    # Execute the SQL query and fetch the result into a DataFrame
+    df = DBInterface.execute(conn, String(sql)) |> DataFrame
+
+    # Check if the DataFrame is not empty
+    # TODO: Is it really necessary to add this check ??
+    if nrow(df) > 0
+        # Convert the cohort_start_date to DateTime and subtract the date_prior
+        df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
+    end
+
+    return df
+end
+
+export Dummy, period_prior_to_index
