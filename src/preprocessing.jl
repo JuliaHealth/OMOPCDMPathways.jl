@@ -26,4 +26,23 @@ function Dummy(
 
 end
 
-export Dummy
+"""
+Given a treatment history dataframe, this function filters out rows where the difference between drug_exposure_start and drug_exposure_end is less than minEraDuration.
+
+    # Arguments:
+
+    - treatment_history: DataFrame, treatment history dataframe.
+    - minEraDuration: Int, minimum duration of an era.
+
+    # Returns:
+    - Updated dataframe, rows where the difference between drug_exposure_start and drug_exposure_end is less than minEraDuration are filtered out.
+
+"""
+function EraDuration(treatment_history::DataFrame, minEraDuration)
+    treatment_history = filter(row -> (row[:drug_exposure_end] - row[:drug_exposure_start]) >= minEraDuration, treatment_history)
+    @info "After minEraDuration: $(nrow(treatment_history))"  # For debugging purposes
+    
+    return treatment_history
+end
+
+export Dummy, EraDuration
