@@ -6,7 +6,7 @@ The general workflow we expect contributors to adhere to is as follows:
 
 ## 1. Create an Issue about the Problem 📝
 
-If you want to [add functionality] or to work on a bug you found, open an issue first.
+If you want to [add functionality] or to work on a bug you found, open an issue first. Also, it is highly recommended to go through this [Bug Template](https://github.com/JuliaHealth/OMOPCDMPathways.jl/blob/dev/.github/ISSUE_TEMPLATE/bug_report.md) before filling a Bug and this [Feature Addition Template](https://github.com/JuliaHealth/OMOPCDMPathways.jl/blob/dev/.github/ISSUE_TEMPLATE/feature_request.md) before filling a Feature request.
 That'll save you from doing work that we may not support for OMOPCDMPathways.
 
 ## 2. Fork the repo to your account 🍴
