@@ -1,3 +1,3 @@
 # Beginner Tutorial 🐣
 
-> NOTE: This repository is currently under development.
+> NOTE: Tutorials are forthcoming and will be made available soon! 
