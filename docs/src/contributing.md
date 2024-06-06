@@ -1,6 +1,6 @@
-# Contributing to OMOPCDMPathways 😁
+# Contributing to `OMOPCDMPathways.jl` 😁
 
-OMOPCDMPathways is currently under heavy development as we push to a primary release version. 
+`OMOPCDMPathways.jl` is currently under heavy development as we push to a primary release version. 
 We follow a workflow pattern that is directly inspired by the [development workflow guide](http://docs.juliaplots.org/latest/contributing/#Development-Workflow-1) found in [`Plots.jl`](https://github.com/JuliaPlots/Plots.jl).
 The general workflow we expect contributors to adhere to is as follows:
 
@@ -64,9 +64,9 @@ The way we do this is in three steps:
 
 ## 5. Submitting your changes to the main project ✅
 
-Almost done! Go to your fork and there should be a section that asks you to make a pull request (PR) from your branch. This allows the maintainers of OMOPCDMPathways to see if they can add your changes to the main project. If not, you can click the "New pull request" button.
+Almost done! Go to your fork and there should be a section that asks you to make a pull request (PR) from your branch. This allows the maintainers of `OMOPCDMPathways.jl` to see if they can add your changes to the main project. If not, you can click the "New pull request" button.
 
-Make sure the "base" branch is OMOPCDMPathways `dev` and the "compare" branch is the branch on your fork. 
+Make sure the "base" branch is `dev` and the "compare" branch is the branch on your fork. 
 To your PR, add an informative title and description, and link your PR to relevant issues or discussions. 
 Finally, click "Create pull request". 
 
@@ -81,7 +81,7 @@ Therefore, we request that if you have a PR that adds a new dependency, please h
 
 ### Adding Core Dependencies 📒
 
-If you are working on introducing a new core dependency, make sure to add that dependency to the main `Project.toml` for `OMOPCDMPathways`.
+If you are working on introducing a new core dependency, make sure to add that dependency to the main `Project.toml` for `OMOPCDMPathways.jl`.
 To do this, follow these steps:
 
 1. Enter the root of the `OMOPCDMPathways` directory 
