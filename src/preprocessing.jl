@@ -51,4 +51,31 @@ function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab
     return df
 end
 
+"""
+TODO: Add Doc-Strings.
+"""
+function period_prior_to_index(
+        person_ids::Vector, 
+        start_date_on_person::Function, 
+        conn; 
+        date_prior=Day(100)
+    )
+
+    tables = GenerateTables(conn, inplace = false, exported=true)
+
+    sql = start_date_on_person(person_ids, tables)
+
+    df = DBInterface.execute(conn, String(sql)) |> DataFrame
+
+    # Check if the DataFrame is not empty
+    # TODO: Is it really necessary to add this check ??
+    if nrow(df) > 0
+        # Convert the cohort_start_date to DateTime and subtract the date_prior
+        df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
+    end
+
+    return df
+end
+
+
 export Dummy, period_prior_to_index
