@@ -27,7 +27,24 @@ end
 
     println(result)
 
-    # @test test_person_ids == result.cohort_definition_id[1:5]
+    @test test_person_ids == result.cohort_definition_id[1:5]
+    @test test_subject_ids == result.subject_id[1:5]
+
+    function start_date_on_person(cohort_id::Vector, tables)
+        
+        tab = tables[:cohort]
+        
+        sql = From(tab) |>
+        Where(Fun.in(Get.cohort_definition_id, cohort_id...)) |>
+        Select(Get.cohort_definition_id, Get.subject_id, Get.cohort_start_date) |>
+        q -> render(q, dialect = :sqlite)
+
+        return sql
+    end
+
+    result = period_prior_to_index(test_person_ids, start_date_on_person, sqlite_conn)
+    
+    @test test_person_ids == result.cohort_definition_id[1:5]
     @test test_subject_ids == result.subject_id[1:5]
 
 end
