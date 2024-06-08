@@ -26,6 +26,38 @@ function Dummy(
 
 end
 
+function Dummy2(
+    cohort_ids::Vector,
+    conn;
+    tab = cohort 
+)
+
+    df = DBInterface.execute(conn, Dummy2(cohort_ids; tab=tab)) |> DataFrame
+
+    return df
+end
+
+function Dummy2(
+    cohort_ids::Vector;
+    tab = cohort
+)
+
+    sql =
+        From(tab) |>
+        Where(Fun.in(Get.cohort_definition_id, cohort_ids...)) |>
+        Select(Get.cohort_definition_id, Get.subject_id) |>
+        q -> render(q, dialect=dialect)
+
+    return String(sql)
+
+end
+
+
+
+
+
+
+
 
 """
 TODO: Add Doc-Strings.
@@ -78,4 +110,4 @@ function period_prior_to_index(
 end
 
 
-export Dummy, period_prior_to_index
+export Dummy, period_prior_to_index, Dummy2
