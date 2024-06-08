@@ -9,7 +9,12 @@ using Test
 
     @test test_drug_exposure_start_date == result.drug_exposure_start_date[1:4]
     @test test_drug_exposure_ids == result.drug_exposure_id[1:4]
-
+    
+    MakeTables(sqlite_conn, :sqlite, "main")
+    test_cohort_ids = [1.0, 1.0, 1.0, 1.0]
+    # test_df2 = DataFrame(cohort_definition_id = test_cohort_definition_id, cohort_id = test_cohort_ids)
+    df = Dummy2(test_cohort_ids, sqlite_conn)
+    first(df, 5)
 end
 
 
