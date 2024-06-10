@@ -5,4 +5,4 @@ LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 OMOPCDMPathways = "413b2380-0cee-426e-ad22-874d5a2600da"
 
 [compat]
-DocumenterVitepress = "0.0.19, 0.0.20, 0.0.21"
+DocumenterVitepress = "0.0.19"
