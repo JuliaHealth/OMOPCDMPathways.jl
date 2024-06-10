@@ -15,9 +15,7 @@ pgs=[
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
-    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
-    devbranch = "main",
-    devurl = "dev"
+    repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl"
 )
 
 makedocs(;
@@ -34,5 +32,6 @@ deploydocs(;
     target="build", # this is where Vitepress stores its output
     devbranch = "main",
     branch = "gh-pages",
-    push_preview = true
+    push_preview = true,
+    devurl = "dev"
 )
