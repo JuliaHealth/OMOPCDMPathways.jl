@@ -32,7 +32,7 @@ makedocs(;
 deploydocs(;
     repo="github.com/JuliaHealth/OMOPCDMPathways.jl",
     target="build", # this is where Vitepress stores its output
-    devbranch = "dev",
+    devbranch = "main",
     branch = "gh-pages",
     push_preview = true
 )
