@@ -1,0 +1,1 @@
+import{_ as a,c as s,o as n,a6 as e}from"./chunks/framework.BBRSGyax.js";const b=JSON.parse('{"title":"API","description":"","frontmatter":{},"headers":[],"relativePath":"api.md","filePath":"api.md","lastUpdated":null}'),t={name:"api.md"},p=e("",6),r=[p];function o(i,c,l,d,h,_){return n(),s("div",null,r)}const f=a(t,[["render",o]]);export{b as __pageData,f as default};
