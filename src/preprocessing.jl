@@ -59,8 +59,25 @@ end
 
 
 
+
 """
-TODO: Add Doc-Strings.
+function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
+
+    Given a vector of cohort IDs, this function returna a DataFrame with the cohort_start_date adjusted by the date_prior.
+
+    # Arguments:
+
+    - `cohort_id` - vector of cohort IDs
+    - `conn` - database connection
+
+    # Keyword Arguments:
+
+    - `date_prior` - period prior to the index date; default is 100 days
+    - `tab` - the `SQLTable` representing the cohort table; default `cohort`
+
+    # Returns
+
+    - DataFrame with the cohort_start_date adjusted by the date_prior.
 """
 function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
 
@@ -83,8 +100,25 @@ function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab
     return df
 end
 
+
 """
-TODO: Add Doc-Strings.
+function period_prior_to_index(person_ids::Vector, start_date_on_person::Function, conn; date_prior=Day(100))
+
+    Given a vector of person IDs, this function returns a DataFrame with the cohort_start_date adjusted by the date_prior.
+
+    # Arguments:
+
+    - `person_ids` - vector of person IDs
+    - `start_date_on_person` - function that returns the SQL query to get the start date of the person
+    - `conn` - database connection
+
+    # Keyword Arguments:
+
+    - `date_prior` - period prior to the index date; default is 100 days
+
+    # Returns
+
+    - DataFrame with the cohort_start_date adjusted by the date_prior.
 """
 function period_prior_to_index(
         person_ids::Vector, 
