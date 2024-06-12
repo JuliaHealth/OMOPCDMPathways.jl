@@ -61,7 +61,7 @@ end
 
 
 """
-function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
+function Period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
 
     Given a vector of cohort IDs, this function returna a DataFrame with the cohort_start_date adjusted by the date_prior.
 
@@ -79,7 +79,7 @@ function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab
 
     - DataFrame with the cohort_start_date adjusted by the date_prior.
 """
-function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
+function Period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
 
     # Construct the SQL query
     sql = From(tab) |>
@@ -102,7 +102,7 @@ end
 
 
 """
-function period_prior_to_index(person_ids::Vector, start_date_on_person::Function, conn; date_prior=Day(100))
+function Period_prior_to_index(person_ids::Vector, start_date_on_person::Function, conn; date_prior=Day(100))
 
     Given a vector of person IDs, this function returns a DataFrame with the cohort_start_date adjusted by the date_prior.
 
@@ -120,7 +120,7 @@ function period_prior_to_index(person_ids::Vector, start_date_on_person::Functio
 
     - DataFrame with the cohort_start_date adjusted by the date_prior.
 """
-function period_prior_to_index(
+function Period_prior_to_index(
         person_ids::Vector, 
         start_date_on_person::Function, 
         conn; 
@@ -144,4 +144,4 @@ function period_prior_to_index(
 end
 
 
-export Dummy, period_prior_to_index, Dummy2
+export Dummy, Period_prior_to_index, Dummy2
