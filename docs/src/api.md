@@ -10,3 +10,4 @@ This family of functions are dedicated to pre-process the Data.
 
 ```@docs
 Period_prior_to_index
+```
