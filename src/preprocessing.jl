@@ -47,7 +47,7 @@ Given a vector of person IDs, this function returns a DataFrame with the cohort_
 
 # Arguments:
 
-- `person_ids` - vector of person IDs
+- `cohort_id` - vector of cohort IDs
 - `index_date_func` - function that returns the SQL query to get the start date of the person
 - `conn` - database connection
 
@@ -60,7 +60,7 @@ Given a vector of person IDs, this function returns a DataFrame with the cohort_
 - DataFrame with the `cohort_start_date` adjusted by the `date_prior`.
 """
 function period_prior_to_index(
-        person_ids::Vector, 
+        cohort_id::Vector, 
         index_date_func::Function, 
         conn; 
         date_prior=Day(100)
@@ -68,7 +68,7 @@ function period_prior_to_index(
 
     tables = GenerateTables(conn, inplace = false, exported=true)
 
-    sql = index_date_func(person_ids, tables)
+    sql = index_date_func(cohort_id, tables)
 
     df = DBInterface.execute(conn, String(sql)) |> DataFrame
 

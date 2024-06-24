@@ -9,7 +9,7 @@ using Test
 
     test_df2 = DataFrame(person_id = test_person_ids, cohort_start_date = test_cohort_start_date)
     
-    result = Period_prior_to_index(test_person_ids, sqlite_conn)
+    result = period_prior_to_index(test_person_ids, sqlite_conn)
 
     @test test_person_ids == result.cohort_definition_id[1:5]
     @test test_subject_ids == result.subject_id[1:5]
@@ -26,7 +26,7 @@ using Test
         return sql
     end
 
-    result = Period_prior_to_index(test_person_ids, start_date_on_person, sqlite_conn)
+    result = period_prior_to_index(test_person_ids, start_date_on_person, sqlite_conn)
     
     @test test_person_ids == result.cohort_definition_id[1:5]
     @test test_subject_ids == result.subject_id[1:5]
