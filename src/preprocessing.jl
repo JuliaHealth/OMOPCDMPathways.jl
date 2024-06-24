@@ -26,4 +26,4 @@ function Dummy(
 
 end
 
-export Dummy, create_treatment_history
+export Dummy
