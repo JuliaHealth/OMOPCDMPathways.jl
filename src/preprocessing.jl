@@ -26,7 +26,24 @@ function Dummy(
 
 end
 
+
 """
+# Example:
+
+    test_person_ids = [1, 1, 1, 1, 1]
+    test_drug_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7, 1.3291776e9]
+    test_drug_end_date = [-364953600, 31449600, -532483200, -80006400, 1330387200]
+    
+    test_df = DataFrame(person_id = test_person_ids, drug_exposure_start = test_drug_start_date, drug_exposure_end = test_drug_end_date)
+    
+    calculate_era_duration(
+        treatment_history = test_df, 
+        minEraDuration = 920000
+    )
+
+# Implemetation: 
+    (1) It filters the treatment_history DataFrame to retain only those rows where the duration between drug_exposure_end and drug_exposure_start is at least minEraDuration.
+
 Given a treatment history dataframe, this function filters out rows where the difference between drug_exposure_start and drug_exposure_end is less than minEraDuration.
 
     # Arguments:
@@ -38,11 +55,12 @@ Given a treatment history dataframe, this function filters out rows where the di
     - Updated dataframe, rows where the difference between drug_exposure_start and drug_exposure_end is less than minEraDuration are filtered out.
 
 """
-function EraDuration(treatment_history::DataFrame, minEraDuration)
-    treatment_history = filter(row -> (row[:drug_exposure_end] - row[:drug_exposure_start]) >= minEraDuration, treatment_history)
-    @info "After minEraDuration: $(nrow(treatment_history))"  # For debugging purposes
+
+function calculate_era_duration(treatment_history::DataFrame, minEraDuration)
+    
+    treatment_history = filter(row -> (row[:drug_exposure_end] - row[:drug_exposure_start]) >= minEraDuration, treatment_history)    
     
     return treatment_history
 end
 
-export Dummy, EraDuration
+export Dummy, calculate_era_duration

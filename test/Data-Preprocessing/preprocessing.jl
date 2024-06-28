@@ -14,7 +14,7 @@ end
 
 
 
-@testset "Era Duration Tests" begin
+@testset "Calculate Era Duration Tests" begin
     MakeTables(sqlite_conn, :sqlite, "main")
     
     test_person_ids = [1, 1, 1, 1, 1]
@@ -27,7 +27,7 @@ end
     expected_drug_exposure_start = [-3.727296e8, 2.90304e7, -8.18208e7, 1.3291776e9]
     expected_drug_exposure_end = [-364953600, 31449600, -80006400, 1330387200]
 
-    result = EraDuration(test_df3, 920000)
+    result = calculate_era_duration(test_df3, 920000)
 
     @test expected_person_id == result.person_id[1:4]
     @test expected_drug_exposure_start == result.drug_exposure_start[1:4]
