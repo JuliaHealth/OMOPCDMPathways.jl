@@ -29,21 +29,12 @@ end
 
 
 """
-# Example:
-    [test_person_ids = [1, 1, 1, 1, 1]
-    test_drug_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7, 1.3291776e9]
-    test_drug_end_date = [-364953600, 31449600, -532483200, -80006400, 1330387200]]
-    test_df = DataFrame(person_id = test_person_ids, drug_exposure_start = test_drug_start_date, drug_exposure_end = test_drug_end_date)
-    
-    EraCollapse(
-        treatment_history = test_df,
-        eraCollapseSize = 400000000
-    )
-
-# Implemetation: 
-    (1) Sorts the dataframe by event_start_date and event_end_date.
-    (2) Calculates the gap between each era and the previous era.
-    (3) Filters out rows with gap_same > eraCollapseSize.
+```julia
+EraCollapse(
+    treatment_history::DataFrame, 
+    eraCollapseSize::Int
+)
+```
 
 Given a treatment history dataframe, this function collapses eras that are separated by a gap of size <= eraCollapseSize.
 
@@ -55,6 +46,36 @@ Given a treatment history dataframe, this function collapses eras that are separ
 # Returns:
 
 - Updated dataframe, eras collapsed based on the specified gap size.
+
+
+# Note: 
+
+    (1) Sorts the dataframe by event_start_date and event_end_date.
+    (2) Calculates the gap between each era and the previous era.
+    (3) Filters out rows with gap_same > eraCollapseSize.
+
+# Example:
+
+```julia-repl
+julia> [test_person_ids = [1, 1, 1, 1, 1]
+
+julia> test_drug_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7, 1.3291776e9]
+    
+julia> test_drug_end_date = [-364953600, 31449600, -532483200, -80006400, 1330387200]]
+    
+julia> test_df = DataFrame(person_id = test_person_ids, drug_exposure_start = test_drug_start_date, drug_exposure_end = test_drug_end_date)
+    
+julia> EraCollapse(treatment_history = test_df, eraCollapseSize = 400000000)
+4×4 DataFrame
+ Row │ person_id  drug_exposure_start  drug_exposure_end  gap_same   
+     │ Int64      Float64              Int64              Float64    
+─────┼───────────────────────────────────────────────────────────────
+   1 │         1           -5.33347e8         -532483200  -1.86373e9
+   2 │         1           -3.7273e8          -364953600   1.59754e8
+   3 │         1           -8.18208e7          -80006400   2.83133e8
+   4 │         1            2.90304e7           31449600   1.09037e8
+```
+
 """
 
 
