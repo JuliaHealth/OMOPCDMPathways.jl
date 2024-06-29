@@ -37,12 +37,12 @@ calculate_era_duration(
 
 Given a treatment history dataframe, this function filters out rows where the difference between `drug_exposure_start` and `drug_exposure_end` is less than `minEraDuration`.
 
-    # Arguments:
+# Arguments:
 
     - `treatment_history::DataFrame` - treatment history dataframe.
     - `minEraDuration::Real` - minimum duration of an era.
 
-    # Returns:
+# Returns:
 
     - Updated `DataFrame`, rows where the difference between `drug_exposure_start` and `drug_exposure_end` is less than `minEraDuration` are filtered out.
 
