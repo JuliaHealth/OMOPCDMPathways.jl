@@ -7,7 +7,7 @@ using Test
     test_subject_ids = [1.0, 5.0, 9.0, 11.0, 12.0]
     test_cohort_start_date = [-3.7273e8, 2.90304e7, -5.33347e8, -8.18208e7, 1.32918e9]
 
-    test_df2 = DataFrame(person_id = test_person_ids, cohort_start_date = test_cohort_start_date)
+  test_df2 = DataFrame(person_id = test_person_ids, cohort_start_date = test_cohort_start_date)
     
     result = period_prior_to_index(test_person_ids, sqlite_conn)
 

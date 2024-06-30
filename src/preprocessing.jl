@@ -121,5 +121,4 @@ function period_prior_to_index(
     return df
 end
 
-
 export period_prior_to_index
