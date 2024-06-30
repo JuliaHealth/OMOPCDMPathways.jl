@@ -1,32 +1,5 @@
 using DataFrames, Dates
 
-function Dummy(
-    drug_exposure_ids,
-    conn;
-    tab = drug_exposure 
-)
-
-    df = DBInterface.execute(conn, Dummy(drug_exposure_ids; tab=tab)) |> DataFrame
-
-    return df
-end
-
-function Dummy(
-    drug_exposure_ids;
-    tab = drug_exposure
-)
-
-    sql =
-        From(tab) |>
-        Where(Fun.in(Get.drug_exposure_id, drug_exposure_ids...)) |>
-        Select(Get.drug_exposure_id, Get.drug_exposure_start_date) |>
-        q -> render(q, dialect=dialect)
-
-    return String(sql)
-
-end
-
-
 
 """
 ```julia
@@ -53,6 +26,9 @@ Given a treatment history dataframe, this function collapses eras that are separ
     (1) Sorts the dataframe by event_start_date and event_end_date.
     (2) Calculates the gap between each era and the previous era.
     (3) Filters out rows with gap_same > eraCollapseSize.
+
+    It filters the treatment history `DataFrame` to retain only those rows where the duration between `drug_exposure_end` and `drug_exposure_start` is at least `minEraDuration`.
+
 
 # Example:
 
@@ -92,4 +68,5 @@ function EraCollapse(treatment_history::DataFrame, eraCollapseSize::Int)
 end
 
 
-export Dummy, EraCollapse
+export EraCollapse
+

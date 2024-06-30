@@ -6,15 +6,16 @@ DocMeta.setdocmeta!(OMOPCDMPathways, :DocTestSetup, :(using OMOPCDMPathways); re
 
 pgs=[
     "Home" => "index.md",
-    "Tutorials" => "tutorials.md",
+    "Tutorials" => [
+            "Tutorials" => "tutorials.md",
+            "Beginner Tutorial 🐣" => "beginner_tutorial.md",
+            ],
     "Api" => "api.md",
     "Contributing" => "contributing.md"
 ]
 
 fmt  = DocumenterVitepress.MarkdownVitepress(
     repo="https://github.com/JuliaHealth/OMOPCDMPathways.jl",
-    devbranch = "main",
-    devurl = "dev"
 )
 
 makedocs(;
@@ -24,11 +25,6 @@ makedocs(;
     sitename = "OMOPCDMPathways.jl",
     format = fmt,
     pages = pgs,
-    warnonly = true,
-    draft = false,
-    source = "src",
-    build = "build",
-    checkdocs=:all
 )
 
 deploydocs(;
