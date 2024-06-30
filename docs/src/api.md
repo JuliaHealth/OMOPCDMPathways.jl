@@ -8,8 +8,5 @@ There are a few different sections with a brief explanation of what these sectio
 This family of functions are dedicated to pre-process the Data.
 
 ```@docs
-calculate_era_duration
-```
-```@docs
 EraCollapse
 ```
