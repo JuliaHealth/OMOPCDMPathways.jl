@@ -32,7 +32,6 @@ Given `cohort_id's` , return a `DataFrame` with the `cohort_start_date` adjusted
 - DataFrame with the `cohort_start_date` adjusted by the `date_prior`.
 
 """
-
 function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab=cohort)
 
     # Construct the SQL query
@@ -56,7 +55,6 @@ end
 
 
 """
-
 #Example:
     function start_date_on_person(cohort_id::Vector, tables, conn)
         
@@ -107,7 +105,6 @@ Given a vector of person IDs, this function returns a DataFrame with the cohort_
 - DataFrame with the `cohort_start_date` adjusted by the `date_prior`.
 
 """
-
 function period_prior_to_index(
         cohort_id::Vector, 
         index_date_func::Function, 
