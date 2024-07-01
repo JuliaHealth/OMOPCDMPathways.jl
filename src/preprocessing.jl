@@ -57,25 +57,25 @@ end
 """
 #Example:
     function start_date_on_person(cohort_id::Vector, tables, conn)
-        
+
         tab = tables[:cohort]
         date_prior = Day(100)
-            
+
         sql = From(tab) |>
         Where(Fun.in(Get.cohort_definition_id, cohort_id...)) |>
         Select(Get.cohort_definition_id, Get.subject_id, Get.cohort_start_date) |>
         q -> render(q, dialect = :sqlite)
-            
+
         df = DBInterface.execute(conn, String(sql)) |> DataFrame
 
         # Check if the DataFrame is not empty
         if nrow(df) > 0
-                # Convert the cohort_start_date to DateTime and subtract the date_prior
-                df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
+            # Convert the cohort_start_date to DateTime and subtract the date_prior
+            df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
         else
             error("Invalid DataFrame: $df")
         end
-            
+
         return df
     end
 
