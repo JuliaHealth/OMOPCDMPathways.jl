@@ -56,6 +56,7 @@ end
 
 """
 #Example:
+
     function start_date_on_person(cohort_id::Vector, tables, conn)
 
         tab = tables[:cohort]
