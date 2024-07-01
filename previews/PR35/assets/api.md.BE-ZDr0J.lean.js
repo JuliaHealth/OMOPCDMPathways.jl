@@ -1,1 +1,0 @@
-import{_ as a,c as e,o as s,a6 as n}from"./chunks/framework.DohIApeR.js";const b=JSON.parse('{"title":"API","description":"","frontmatter":{},"headers":[],"relativePath":"api.md","filePath":"api.md","lastUpdated":null}'),t={name:"api.md"},o=n("",6),p=[o];function i(r,c,d,l,h,_){return s(),e("div",null,p)}const g=a(t,[["render",i]]);export{b as __pageData,g as default};
