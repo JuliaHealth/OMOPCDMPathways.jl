@@ -73,7 +73,7 @@ end
             # Convert the cohort_start_date to DateTime and subtract the date_prior
             df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
         else
-            error("Invalid DataFrame: $df")
+            error("Invalid DataFrame")
         end
 
         return df
