@@ -1,1 +1,1 @@
-![Work-Flow of the Package, The Steps involved in Pathways Synthesis](workflows.png)
+![Work-Flow of the Package, The Steps involved in Pathways Synthesis](./assets/workflows.png)
