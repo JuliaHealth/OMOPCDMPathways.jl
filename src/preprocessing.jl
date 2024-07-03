@@ -1,5 +1,3 @@
-using DataFrames, Dates
-
 """
 ```julia
 calculate_era_duration(
@@ -12,17 +10,17 @@ Given a treatment history dataframe, this function filters out rows where the di
 
 # Arguments:
 
-    - `treatment_history::DataFrame` - treatment history dataframe.
-    - `minEraDuration::Real` - minimum duration of an era.
+- `treatment_history::DataFrame` - treatment history dataframe.
+
+- `minEraDuration::Real` - minimum duration of an era.
 
 # Returns:
 
-    - Updated `DataFrame`, rows where the difference between `drug_exposure_start` and `drug_exposure_end` is less than `minEraDuration` are filtered out.
-
+- Updated `DataFrame`, rows where the difference between `drug_exposure_start` and `drug_exposure_end` is less than `minEraDuration` are filtered out.
 
 # Note: 
 
-    It filters the treatment history `DataFrame` to retain only those rows where the duration between `drug_exposure_end` and `drug_exposure_start` is at least `minEraDuration`.
+It filters the treatment history `DataFrame` to retain only those rows where the duration between `drug_exposure_end` and `drug_exposure_start` is at least `minEraDuration`.
 
 # Example:
 
@@ -63,12 +61,13 @@ EraCollapse(
 )
 ```
 
-Given a treatment history dataframe, this function collapses eras that are separated by a gap of size <= eraCollapseSize.
+Given a treatment history dataframe, this function collapses eras that are separated by a gap of size <= `eraCollapseSize`.
 
 # Arguments:
 
-- treatment_history: DataFrame, treatment history dataframe.containing drug_exposure_start and drug_exposure_end
-- eraCollapseSize: Int, maximum gap size for collapsing eras.
+- `treatment_history::DataFrame` - treatment history dataframe.containing drug_exposure_start and drug_exposure_end
+
+- `eraCollapseSize::Int` - maximum gap size for collapsing eras.
 
 # Returns:
 
@@ -77,21 +76,22 @@ Given a treatment history dataframe, this function collapses eras that are separ
 
 # Note: 
 
-    (1) Sorts the dataframe by event_start_date and event_end_date.
-    (2) Calculates the gap between each era and the previous era.
-    (3) Filters out rows with gap_same > eraCollapseSize.
+This is how the overall algorithm for this function is defined
 
-    It filters the treatment history `DataFrame` to retain only those rows where the duration between `drug_exposure_end` and `drug_exposure_start` is at least `minEraDuration`.
+1. Sorts the dataframe by event_start_date and event_end_date.
+2. Calculates the gap between each era and the previous era.
+3. Filters out rows with gap_same > eraCollapseSize.
 
+It filters the treatment history `DataFrame` to retain only those rows where the duration between `drug_exposure_end` and `drug_exposure_start` is at least `minEraDuration`.
 
 # Example:
 
 ```julia-repl
-julia> [test_person_ids = [1, 1, 1, 1, 1]
+julia> test_person_ids = [1, 1, 1, 1, 1];
 
-julia> test_drug_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7, 1.3291776e9]
+julia> test_drug_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7, 1.3291776e9];
     
-julia> test_drug_end_date = [-364953600, 31449600, -532483200, -80006400, 1330387200]]
+julia> test_drug_end_date = [-364953600, 31449600, -532483200, -80006400, 1330387200]];
     
 julia> test_df = DataFrame(person_id = test_person_ids, drug_exposure_start = test_drug_start_date, drug_exposure_end = test_drug_end_date)
     
@@ -105,10 +105,7 @@ julia> EraCollapse(treatment_history = test_df, eraCollapseSize = 400000000)
    3 │         1           -8.18208e7          -80006400   2.83133e8
    4 │         1            2.90304e7           31449600   1.09037e8
 ```
-
 """
-
-
 function EraCollapse(treatment_history::DataFrame, eraCollapseSize::Int)
 
     sort!(treatment_history, [:drug_exposure_start, :drug_exposure_end])
