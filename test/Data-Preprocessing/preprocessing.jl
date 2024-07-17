@@ -41,7 +41,7 @@ using Test
     
     @test test_person_ids == result.cohort_definition_id[1:5]
     @test test_subject_ids == result.subject_id[1:5]
-
+end
   
 @testset "Calculate Era Duration Tests" begin
     MakeTables(sqlite_conn, :sqlite, "main")
