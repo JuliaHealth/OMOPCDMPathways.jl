@@ -10,4 +10,6 @@ This family of functions are dedicated to pre-process the Data.
 
 ```@docs
 period_prior_to_index
+EraCollapse
+calculate_era_duration
 ```
