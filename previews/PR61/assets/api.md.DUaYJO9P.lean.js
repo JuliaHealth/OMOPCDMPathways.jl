@@ -1,1 +1,0 @@
-import{_ as s,c as i,o as a,a6 as t}from"./chunks/framework.Cmb53IXr.js";const c=JSON.parse('{"title":"API","description":"","frontmatter":{},"headers":[],"relativePath":"api.md","filePath":"api.md","lastUpdated":null}'),n={name:"api.md"},e=t("",7),h=[e];function p(l,k,r,d,E,g){return a(),i("div",null,h)}const y=s(n,[["render",p]]);export{c as __pageData,y as default};
