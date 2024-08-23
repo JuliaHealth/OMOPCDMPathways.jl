@@ -31,6 +31,19 @@ sqlite_conn = SQLite.DB(Eunomia())
 GenerateDatabaseDetails(:sqlite, "main")
 GenerateTables(sqlite_conn)
 
+cohort = read("./assets/strep_throat.json", String)
+
+#using DBInterface
+
+model = Model(cdm_version=v"5.3.1", cdm_schema="main",
+                     vocabulary_schema="main", results_schema="main",
+                     target_schema="main", target_table="cohort");
+
+sql = translate(cohort, dialect=:sqlite, model=model,
+                         cohort_definition_id=1);
+
+[DBI.execute(sqlite_conn, sub_query) for sub_query in split(sql, ";")[1:end-1]]
+
 @testset "OMOPCDMPathways" begin
 	@testset "Data-Preprocessing" begin
 		include("Data-Preprocessing/preprocessing.jl")
