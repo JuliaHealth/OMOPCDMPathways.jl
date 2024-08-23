@@ -41,6 +41,11 @@ using Test
     
     @test test_person_ids == result.cohort_definition_id[1:5]
     @test test_subject_ids == result.subject_id[1:5]
+
+    # test for the invalid dataframe
+    df = DataFrame(person_id = [1, 2, 3])  
+    invalid_index_date = :nonexistent_date
+    @test_throws ErrorException period_prior_to_index(df, invalid_index_date, sqlite_conn)
 end
   
 @testset "Calculate Era Duration Tests" begin
