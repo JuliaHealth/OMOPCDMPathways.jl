@@ -43,13 +43,10 @@ function period_prior_to_index(cohort_id::Vector, conn; date_prior=Day(100), tab
     # Execute the SQL query and fetch the result into a DataFrame
     df = DBInterface.execute(conn, String(sql)) |> DataFrame
 
-    if nrow(df) > 0
+    @assert nrow(df) > 0
         # Convert the cohort_start_date to DateTime and subtract the date_prior
         df.cohort_start_date = DateTime.(df.cohort_start_date) .- date_prior
-    else
-        error("Invalid DataFrame: $df")
-    end
-
+    
     return df
 end
 
