@@ -88,3 +88,24 @@ end
     @test expected_drug_exposure_start == result.drug_exposure_start[1:4]
     @test expected_drug_exposure_end == result.drug_exposure_end[1:4]
 end
+
+
+@testset "create_treatment_history Tests" begin
+    cohorts = create_mock_cohorts()
+    filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "startDate")
+    print(filtered_cohorts)
+    @test size(filtered_cohorts, 1) == 0
+
+
+    cohorts = create_mock_cohorts()
+    filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "endDate")
+    @test size(filtered_cohorts, 1) == 0
+    print(filtered_cohorts)
+
+
+    cohorts = create_mock_cohorts()
+    filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "wrongValue")
+    @test size(filtered_cohorts, 1) == 0
+    print(filtered_cohorts)
+
+end
