@@ -11,6 +11,7 @@ pgs=[
             "Beginner Tutorial 🐣" => "beginner_tutorial.md",
             ],
     "Api" => "api.md",
+    "How It Works" => "workflows.md",
     "Contributing" => "contributing.md"
 ]
 
