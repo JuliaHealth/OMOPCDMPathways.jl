@@ -90,6 +90,17 @@ end
 end
 
 
+function create_mock_cohorts()
+    return DataFrame(
+        cohort_id = [1.0, 1.0, 1.0, 1.0],
+        subject_id = [1.0, 5.0, 9.0, 11.0],
+        cohort_start_date = [-3.727296e8, 2.90304e7, -5.333472e8, -8.18208e7],
+        cohort_end_date = [-364953600, 31449600, -532483200, -80006400],
+        cohort_start_date_1 = [Date(2020, 1, 15), Date(2018, 2, 15), Date(2016, 3, 15), Date(2014, 4, 15)],
+        cohort_end_date_1 = [Date(2048, 2, 14), Date(2050, 3, 14), Date(2052, 4, 14), Date(2054, 5, 14)]
+    )
+end
+
 @testset "create_treatment_history Tests" begin
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "startDate")
