@@ -58,30 +58,6 @@ conn = DB(eunomia)
 ```
 
 With Eunomia, the database's schema is simply called "main".
-We will use this to generate database connection details that will inform `OMOPCDMCohortCreator` about the type of queries we will write (i.e. SQLite) and the name of the database's schema.
-For this step, we will use `OMOPCDMCohortCreator`:
-
-```julia
-import OMOPCDMCohortCreator as occ
-
-occ.GenerateDatabaseDetails(
-    :sqlite,
-    "main"
-)
-```
-
-Finally, we will generate internal representations of each table found within Eunomia for OMOPCDMCohortCreator to use:
-
-```julia
-occ.GenerateTables(conn)
-```
-
-As a check to make sure everything was correctly installed and works properly, the following block should work and return a list of all person ids in this data:
-
-```julia
-occ.GetDatabasePersonIDs(conn)
-```
-
 
 ## Building Pathways 🚀
 
