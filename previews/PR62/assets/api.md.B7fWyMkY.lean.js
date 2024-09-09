@@ -1,1 +1,0 @@
-import{_ as s,c as i,o as a,a7 as t}from"./chunks/framework.Dq6kGRM7.js";const y=JSON.parse('{"title":"API","description":"","frontmatter":{},"headers":[],"relativePath":"api.md","filePath":"api.md","lastUpdated":null}'),n={name:"api.md"},h=t("",8),e=[h];function l(k,p,r,d,E,g){return a(),i("div",null,e)}const F=s(n,[["render",l]]);export{y as __pageData,F as default};
