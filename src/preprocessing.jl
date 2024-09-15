@@ -313,7 +313,7 @@ function selectRowsCombinationWindow!(treatment_history::DataFrame)  # selects/t
     return treatment_history
 end
 
-function combination_Window(treatment_history::DataFrame, combinationWindow::Day, minPostCombinationDuration::Int)
+function combination_Window(treatment_history::DataFrame, combinationWindow::Day)
     treatment_history = selectRowsCombinationWindow!(treatment_history)
     # combinationWindow = Int64(combinationWindow)
     while any(treatment_history.SELECTED_ROWS .== 1)
