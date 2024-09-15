@@ -134,22 +134,24 @@ end
 @testset "Combination" begin
     df = create_mock_cohorts2()
     df_expected = DataFrame(
-    event_start_date = [Date("2020-01-15"), Date("2020-04-21"), Date("2020-01-06"), Date("2020-02-22")],
-    event_end_date = [Date("2020-03-01"), Date("2020-06-25"), Date("2020-02-10"), Date("2020-05-20")],
-    event_cohort_id = ["C", "E", "B", "D"],
-    person_id = [1,1,2,2],
-    GAP_PREVIOUS = [missing, 51, missing, 12],  # GAP_PREVIOUS values
+    event_start_date = [Date("2020-01-06"), Date("2020-01-11"), Date("2020-01-16"), Date("2020-01-21")],
+    event_end_date = [Date("2020-01-10"), Date("2020-01-15"), Date("2020-01-20"), Date("2020-01-25")],
+    event_cohort_id = ["B", "C", "D", "E"],
+    person_id = [2, 2, 2, 2],
+    GAP_PREVIOUS = [missing, 1, 1, 1],  # GAP_PREVIOUS values
     SELECTED_ROWS = [0, 0, 0, 0]         # SELECTED_ROWS values
     )
-    
+
     println(df)
-    combinationWindow = Day(10)     
-    df_transformed = combination_Window(df, combinationWindow)
+    combinationWindow = Day(10)
+    minPostCombinationDuration = 20
+
+    df_transformed = combination_Window(df, combinationWindow, minPostCombinationDuration)
     println(df_transformed)
 
 
     @test size(df_transformed) == size(df_expected)
-    
+
     @test df_transformed.event_start_date == df_expected.event_start_date
     @test df_transformed.event_end_date == df_expected.event_end_date
     @test df_transformed.event_cohort_id == df_expected.event_cohort_id
