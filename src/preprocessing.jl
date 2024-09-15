@@ -249,62 +249,6 @@ function calculate_era_duration(treatment_history::DataFrame, minEraDuration)
 end
 
 
-# Is used to create a new array where each element is shifted by a 
-# specified number of positions relative to the original array
-function shift(arr, n::Int)
-    if n > 0
-        return [fill(missing, n); arr[1:end-n]]
-    elseif n < 0
-        return [arr[-n+1:end]; fill(missing, -n)]
-    else
-        return arr
-    end
-end
-
-function selectRowsCombinationWindow(treatment_history::DataFrame)
-    sort!(treatment_history, [:person_id, :event_start_date, :event_end_date])
-    treatment_history.GAP_PREVIOUS = Dates.value.(treatment_history.event_start_date .- shift(treatment_history.event_end_date, 1))
-    treatment_history.SELECTED_ROWS = ifelse.(treatment_history.GAP_PREVIOUS .< 0, 1, 0)
-    treatment_history
-end
-
-function combination_Window(treatment_history::DataFrame, combinationWindow::Int, minPostCombinationDuration::Int)
-    treatment_history.event_cohort_id = string.(treatment_history.event_cohort_id)
-    treatment_history = selectRowsCombinationWindow(treatment_history)
-
-    while any(treatment_history.SELECTED_ROWS .== 1)
-        overlap = shift(treatment_history.event_end_date, 1) .- treatment_history.event_start_date
-        # Correctly handle Missing values before calling Dates.value
-        overlap_days = [ismissing(o) ? 0 : Dates.value(o) for o in overlap]
-        selected_rows = findall(treatment_history.SELECTED_ROWS .== 1)
-
-        for i in selected_rows
-            gap_previous = treatment_history[i, :GAP_PREVIOUS]
-            duration_era = Dates.value(treatment_history[i, :event_end_date] - treatment_history[i, :event_start_date])
-            prev_duration_era = Dates.value(treatment_history[i-1, :event_end_date] - treatment_history[i-1, :event_start_date])
-
-            if -gap_previous < combinationWindow && !(-gap_previous in [duration_era, prev_duration_era])
-                # Switch
-                treatment_history[i-1, :event_end_date] = treatment_history[i, :event_start_date]
-            elseif -gap_previous >= combinationWindow || -gap_previous in [duration_era, prev_duration_era]
-                if treatment_history[i-1, :event_end_date] <= treatment_history[i, :event_end_date]
-                    # FRFS
-                    new_row = deepcopy(treatment_history[i, :])
-                    new_row.event_end_date = treatment_history[i-1, :event_end_date]
-                    append!(treatment_history, DataFrame(new_row'))
-                else
-                    # LRFS
-                    treatment_history[i, :event_end_date] = treatment_history[i-1, :event_end_date]
-                end
-            end
-        end
-
-        treatment_history = selectRowsCombinationWindow(treatment_history)
-    end
-end
-
-
-
 function create_treatment_history(current_cohorts::DataFrame, targetCohortId::Int, cohort_ids::Vector{Int}, periodPriorToIndex::Int, includeTreatments::String)
 
     # Add index year column based on start date of target cohort
@@ -341,6 +285,66 @@ function create_treatment_history(current_cohorts::DataFrame, targetCohortId::In
     select!(current_cohorts, Not(:lag_variable))
 
     return current_cohorts
+end
+
+
+function selectRowsCombinationWindow!(treatment_history::DataFrame)  # selects/tells the dates/treatments that are overlapping, if they are overlaping we mark
+    sort!(treatment_history, [:person_id, :event_start_date, :event_end_date])  # them with a SELECTED_ROWS column
+    
+    n = nrow(treatment_history)
+    treatment_history.GAP_PREVIOUS = Vector{Union{Int64, Missing}}(missing, n)
+    treatment_history.SELECTED_ROWS = Vector{Int}(undef, n)
+    
+    for i in 2:n
+        if treatment_history.person_id[i] == treatment_history.person_id[i-1]
+            treatment_history.GAP_PREVIOUS[i] = Dates.value(treatment_history.event_start_date[i] - treatment_history.event_end_date[i-1])
+        else
+            treatment_history.GAP_PREVIOUS[i] = missing
+        end
+    end
+    
+    for i in 1:n
+        if ismissing(treatment_history.GAP_PREVIOUS[i]) || treatment_history.GAP_PREVIOUS[i] >= 0
+            treatment_history.SELECTED_ROWS[i] = 0
+        else
+            treatment_history.SELECTED_ROWS[i] = 1
+        end
+    end
+    return treatment_history
+end
+
+function combination_Window(treatment_history::DataFrame, combinationWindow::Day, minPostCombinationDuration::Int)
+    treatment_history = selectRowsCombinationWindow!(treatment_history)
+    # combinationWindow = Int64(combinationWindow)
+    while any(treatment_history.SELECTED_ROWS .== 1)
+        selected_rows = findall(treatment_history.SELECTED_ROWS .== 1)
+
+        for i in selected_rows
+            gap_previous = treatment_history[i, :GAP_PREVIOUS]
+            duration_era = Dates.value(treatment_history[i, :event_end_date] - treatment_history[i, :event_start_date])
+            prev_duration_era = Dates.value(treatment_history[i-1, :event_end_date] - treatment_history[i-1, :event_start_date])
+
+            if -gap_previous < combinationWindow && !(-gap_previous in [duration_era, prev_duration_era])
+                # Switch
+                treatment_history[i-1, :event_end_date] = treatment_history[i, :event_start_date]    # combining the dates part
+            elseif -gap_previous >= combinationWindow || -gap_previous in [duration_era, prev_duration_era]
+                if treatment_history[i-1, :event_end_date] <= treatment_history[i, :event_end_date]
+                    # FRFS
+                    # new_row = deepcopy(treatment_history[i, :]) #Create a deep copy of the entire row i from the treatment_history DataFrame
+                    treatment_history.event_end_date = treatment_history[i-1, :event_end_date]
+                    # append!(treatment_history, DataFrame(new_row'))
+                else
+                    # LRFS
+                    treatment_history[i, :event_end_date] = treatment_history[i-1, :event_end_date]
+                end
+            end
+        end
+
+        treatment_history = selectRowsCombinationWindow!(treatment_history)
+
+        # doStepDuration function to filter treatments based on minPostCombinationDuration
+    end
+    return treatment_history
 end
 
 export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, combination_Window
