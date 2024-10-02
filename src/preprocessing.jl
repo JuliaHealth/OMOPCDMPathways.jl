@@ -288,4 +288,48 @@ function create_treatment_history(current_cohorts::DataFrame, targetCohortId::In
 end
 
 
-export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index
+"""
+```julia
+minPostCombinationDuration_filter(
+    df::DataFrame, 
+    minPostCombinationDuration :: Int
+)
+```
+
+Given a treatment_history data-frame, this function will filter rows of the data-frame where GAP_PRVEVIOUS is missing or duration_era is greater than or equal to minPostCombinationDuration
+
+# Argument:
+
+- `treatment_history::DataFrame` - treatment history dataframe.
+
+- `minPostCombinationDuration::Real` - minimum thresold.
+
+# Returns:
+
+- Updated 'DataFrame`, based on `minPostCombinationDuration` parameter
+
+
+# Example:
+
+```julia-repl
+julia> df1 = DataFrame(GAP_PREVIOUS = [missing, 5, 10], duration_era = [15, 10, 8])
+
+julia> result1 = minPostCombinationDuration_filter(df1, 10)
+
+2x2 DataFrame
+ Row │ GAP_PREVIOUS  duration_era 
+     │ Int64?          Int64        
+─────┼──────────────────────────────
+   1 │        missing            15
+   2 │              5            10
+```
+"""
+
+
+function  minPostCombinationDuration_filter(df::DataFrame, minPostCombinationDuration :: Int)
+    # Filter rows where GAP_PREVIOUS is missing or duration_era is greater than or equal to minPostCombinationDuration
+    filtered_df = filter(row -> isnothing(row.GAP_PREVIOUS) || row.duration_era >= minPostCombinationDuration, df)
+    return filtered_df
+end
+
+export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, minPostCombinationDuration_filter
