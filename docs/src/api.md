@@ -12,4 +12,6 @@ This family of functions are dedicated to pre-process the Data.
 period_prior_to_index
 EraCollapse
 calculate_era_duration
+create_treatment_history
+minPostCombinationDuration_filter
 ```
