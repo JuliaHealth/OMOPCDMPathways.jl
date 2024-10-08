@@ -122,32 +122,30 @@ end
 end
 
 
-function create_mock_cohorts2()
+function create_mock_cohorts_with_overlap()
     return DataFrame(
-        event_start_date = [Date("2020-01-06"), Date("2020-01-15"), Date("2020-02-22"), Date("2020-04-21")],
-        event_end_date = [Date("2020-02-10"), Date("2020-03-01"), Date("2020-05-20"), Date("2020-06-25")],
+        event_start_date = [Date("2020-01-06"), Date("2020-01-15"), Date("2020-02-10"), Date("2020-02-22")],
+        event_end_date = [Date("2020-02-10"), Date("2020-02-05"), Date("2020-03-01"), Date("2020-03-10")],
         event_cohort_id = ["B", "C", "D", "E"],
-        person_id = [2,1,2,1]
+        person_id = [1,1,1,1]
     )
 end
 
-@testset "Combination" begin
-    df = create_mock_cohorts2()
+@testset "Combination with Overlap" begin
+    df = create_mock_cohorts_with_overlap()
     df_expected = DataFrame(
-    event_start_date = [Date("2020-01-15"), Date("2020-04-21"), Date("2020-01-06"), Date("2020-02-22")],
-    event_end_date = [Date("2020-03-01"), Date("2020-06-25"), Date("2020-02-10"), Date("2020-05-20")],
-    event_cohort_id = ["C", "E", "B", "D"],
-    person_id = [1,1,2,2],
-    GAP_PREVIOUS = [missing, 51, missing, 12],  # GAP_PREVIOUS values
-    SELECTED_ROWS = [0, 0, 0, 0]         # SELECTED_ROWS values
+        event_start_date = [Date("2020-01-06"), Date("2020-02-10"), Date("2020-02-22")],
+        event_end_date = [Date("2020-02-05"), Date("2020-03-01"), Date("2020-03-10")],
+        event_cohort_id = ["B", "D", "E"],
+        person_id = [1, 1, 1],
+        GAP_PREVIOUS = [missing, -5, 0],   # GAP_PREVIOUS values
+        SELECTED_ROWS = [0, 1, 0]          # SELECTED_ROWS values
     )
     
-    println(df)
-    combinationWindow = Day(0)
+    combinationWindow = Day(5)  # A combination window allowing gaps up to 5 days
     
     df_transformed = combination_Window(df, combinationWindow)
     println(df_transformed)
-
 
     @test size(df_transformed) == size(df_expected)
     
@@ -156,6 +154,6 @@ end
     @test df_transformed.event_end_date == df_expected.event_end_date
     @test df_transformed.event_cohort_id == df_expected.event_cohort_id
     @test df_transformed.person_id == df_expected.person_id
+    @test df_transformed.GAP_PREVIOUS == df_expected.GAP_PREVIOUS
     @test df_transformed.SELECTED_ROWS == df_expected.SELECTED_ROWS
-
 end

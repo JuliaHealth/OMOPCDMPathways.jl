@@ -288,13 +288,37 @@ function create_treatment_history(current_cohorts::DataFrame, targetCohortId::In
 end
 
 
-function selectRowsCombinationWindow!(treatment_history::DataFrame)  # selects/tells the dates/treatments that are overlapping, if they are overlaping we mark
-    sort!(treatment_history, [:person_id, :event_start_date, :event_end_date])  # them with a SELECTED_ROWS column
+"""
+    selectRowsCombinationWindow!(treatment_history::DataFrame)
+
+Sorts the `treatment_history` DataFrame by `person_id` and calculates the gap between consecutive treatments for the same person. It then marks rows with overlapping treatments in a new column `SELECTED_ROWS`.
+
+# Arguments
+- `treatment_history::DataFrame`: A DataFrame containing treatment history data. It must have the columns `person_id`, `event_start_date`, and `event_end_date`.
+
+# Modifies
+- Adds or updates the `GAP_PREVIOUS` column to `treatment_history`, representing the gap (in days) between the current treatment's start date and the previous treatment's end date for the same person. A positive value indicates no overlap, while a negative value or `missing` indicates potential overlap or a new sequence of treatments for a person.
+- Adds or updates the `SELECTED_ROWS` column to `treatment_history`, marking rows with overlapping treatments (`1`) and non-overlapping treatments (`0`).
+
+# Returns
+- The modified `treatment_history` DataFrame with added `GAP_PREVIOUS` and `SELECTED_ROWS` columns.
+
+# Example
+```julia
+using DataFrames, Dates
+treatment_history = DataFrame(person_id=[1, 1, 2], event_start_date=[Date(2020, 1, 1), Date(2020, 1, 10), Date(2020, 2, 1)], event_end_date=[Date(2020, 1, 5), Date(2020, 1, 15), Date(2020, 2, 5)])
+selectRowsCombinationWindow!(treatment_history)
+```
+"""
+
+function selectRowsCombinationWindow!(treatment_history::DataFrame)
+    sort!(treatment_history, [:person_id, :event_start_date, :event_end_date])
     
     n = nrow(treatment_history)
     treatment_history.GAP_PREVIOUS = Vector{Union{Int64, Missing}}(missing, n)
     treatment_history.SELECTED_ROWS = Vector{Int}(undef, n)
-    
+
+    # Compute gaps between consecutive rows
     for i in 2:n
         if treatment_history.person_id[i] == treatment_history.person_id[i-1]
             treatment_history.GAP_PREVIOUS[i] = Dates.value(treatment_history.event_start_date[i] - treatment_history.event_end_date[i-1])
@@ -302,7 +326,8 @@ function selectRowsCombinationWindow!(treatment_history::DataFrame)  # selects/t
             treatment_history.GAP_PREVIOUS[i] = missing
         end
     end
-    
+
+    # Mark overlapping rows
     for i in 1:n
         if ismissing(treatment_history.GAP_PREVIOUS[i]) || treatment_history.GAP_PREVIOUS[i] >= 0
             treatment_history.SELECTED_ROWS[i] = 0
@@ -313,10 +338,40 @@ function selectRowsCombinationWindow!(treatment_history::DataFrame)  # selects/t
     return treatment_history
 end
 
+
+
+"""
+    combination_Window(treatment_history::DataFrame, min_post_combination_duration::Int)
+
+Processes the `treatment_history` DataFrame to handle overlapping treatments by either combining them or switching between them based on their start and end dates. It aims to create a more accurate representation of a patient's treatment timeline by considering overlaps and adjusting treatment periods accordingly.
+
+# Arguments
+- `treatment_history::DataFrame`: A DataFrame containing treatment history data. It must have the columns `person_id`, `event_start_date`, `event_end_date`, and `event_cohort_id`.
+- `min_post_combination_duration::Int`: The minimum duration (in days) that a combined treatment period must have to be considered valid after processing overlaps.
+
+# Modifies
+- Updates the `event_start_date` and `event_end_date` columns to reflect the new start and end dates after combining overlapping treatments.
+- Updates the `event_cohort_id` column to reflect the new cohort IDs assigned after combining treatments.
+- Adds or updates the `duration_era` column, recalculating the duration of each treatment era based on the updated start and end dates.
+
+# Returns
+- The modified `treatment_history` DataFrame with adjusted treatment periods and potentially reduced rows due to the combination of overlapping treatments.
+
+# Example
+```julia
+using DataFrames, Dates
+treatment_history = DataFrame(person_id=[1, 1, 2], event_start_date=[Date(2020, 1, 1), Date(2020, 1, 10), Date(2020, 2, 1)], event_end_date=[Date(2020, 1, 5), Date(2020, 1, 15), Date(2020, 2, 5)], event_cohort_id=[101, 102, 201])
+combination_Window(treatment_history, 5)
+```
+"""
+
+
 function combination_Window(treatment_history::DataFrame, combinationWindow::Day)
     treatment_history = selectRowsCombinationWindow!(treatment_history)
-    # combinationWindow = Int64(combinationWindow)
-    while any(treatment_history.SELECTED_ROWS .== 1)
+    changes_made = true  # Initialize a flag to track changes
+
+    while any(treatment_history.SELECTED_ROWS .== 1) && changes_made
+        changes_made = false  # Assume no changes at the start of the loop
         selected_rows = findall(treatment_history.SELECTED_ROWS .== 1)
 
         for i in selected_rows
@@ -324,27 +379,26 @@ function combination_Window(treatment_history::DataFrame, combinationWindow::Day
             duration_era = Dates.value(treatment_history[i, :event_end_date] - treatment_history[i, :event_start_date])
             prev_duration_era = Dates.value(treatment_history[i-1, :event_end_date] - treatment_history[i-1, :event_start_date])
 
-            if -gap_previous < combinationWindow && !(-gap_previous in [duration_era, prev_duration_era])
-                # Switch
-                treatment_history[i-1, :event_end_date] = treatment_history[i, :event_start_date]    # combining the dates part
-            elseif -gap_previous >= combinationWindow || -gap_previous in [duration_era, prev_duration_era]
+            if -gap_previous < Dates.value(combinationWindow) && !(-gap_previous in [duration_era, prev_duration_era])
+                treatment_history[i-1, :event_end_date] = treatment_history[i, :event_start_date]
+                changes_made = true
+            elseif -gap_previous >= Dates.value(combinationWindow) || -gap_previous in [duration_era, prev_duration_era]
                 if treatment_history[i-1, :event_end_date] <= treatment_history[i, :event_end_date]
-                    # FRFS
-                    # new_row = deepcopy(treatment_history[i, :]) #Create a deep copy of the entire row i from the treatment_history DataFrame
-                    treatment_history.event_end_date = treatment_history[i-1, :event_end_date]
-                    # append!(treatment_history, DataFrame(new_row'))
-                else
-                    # LRFS
                     treatment_history[i, :event_end_date] = treatment_history[i-1, :event_end_date]
+                    changes_made = true
+                else
+                    treatment_history[i, :event_end_date] = treatment_history[i-1, :event_end_date]
+                    changes_made = true
                 end
             end
+            # Mark the row as processed
+            treatment_history[i, :SELECTED_ROWS] = 0
         end
 
         treatment_history = selectRowsCombinationWindow!(treatment_history)
-
-        # doStepDuration function to filter treatments based on minPostCombinationDuration
     end
     return treatment_history
 end
+
 
 export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, combination_Window
