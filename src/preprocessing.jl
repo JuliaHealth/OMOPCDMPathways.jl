@@ -289,6 +289,7 @@ end
 
 
 """
+
 ```julia
 minPostCombinationDuration_filter(
     df::DataFrame, 
@@ -324,9 +325,7 @@ julia> result1 = minPostCombinationDuration_filter(df1, 10)
    2 │              5            10
 ```
 """
-
-
-function  minPostCombinationDuration_filter(df::DataFrame, minPostCombinationDuration :: Int)
+function minPostCombinationDuration_filter(df::DataFrame, minPostCombinationDuration :: Int)
     # Filter rows where GAP_PREVIOUS is missing or duration_era is greater than or equal to minPostCombinationDuration
     filtered_df = filter(row -> isnothing(row.GAP_PREVIOUS) || row.duration_era >= minPostCombinationDuration, df)
     return filtered_df
