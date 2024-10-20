@@ -156,3 +156,22 @@ end
     @test df_transformed.person_id == df_expected.person_id
     @test df_transformed.SELECTED_ROWS == df_expected.SELECTED_ROWS
 end
+
+@testset "minPostCombinationDuration_filter" begin
+
+    df1 = DataFrame(GAP_PREVIOUS = [missing, 5, 10], duration_era = [15, 10, 8])
+    result1 = minPostCombinationDuration_filter(df1, 10)
+    expected1 = DataFrame(GAP_PREVIOUS = [missing, 5], duration_era = [15, 10])
+
+    @test nrow(result1) == nrow(expected1)  
+    @test ncol(result1) == ncol(expected1)  
+    @test result1.duration_era == expected1.duration_era  
+
+    df2 = DataFrame(GAP_PREVIOUS = [10, 9, 8], duration_era = [5, 3, 1])
+    result2 = minPostCombinationDuration_filter(df2, 10)
+    expected2 = DataFrame(GAP_PREVIOUS = Int[], duration_era = Int[])
+    @test nrow(result2) == nrow(expected2)
+    @test ncol(result2) == ncol(expected2)
+    @test result2.duration_era == expected2.duration_era  
+    
+end
