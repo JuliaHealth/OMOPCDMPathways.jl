@@ -402,8 +402,6 @@ function combination_Window(treatment_history::DataFrame, combinationWindow::Day
     end
     return treatment_history
 end
-    return treatment_history
-end
 
 """
 ```julia
