@@ -368,10 +368,12 @@ combination_Window(treatment_history, 5)
 
 function combination_Window(treatment_history::DataFrame, combinationWindow::Day)
     treatment_history = selectRowsCombinationWindow!(treatment_history)
+    selected_row_count = count(x -> x == 1, treatment_history.SELECTED_ROWS)  # Count rows with SELECTED_ROWS == 1
     changes_made = true  # Initialize a flag to track changes
+    iteration_count = 0  # Track number of iterations
 
-    while any(treatment_history.SELECTED_ROWS .== 1) && changes_made
-        changes_made = false  # Assume no changes at the start of the loop
+    while iteration_count < selected_row_count && changes_made
+        changes_made = false  
         selected_rows = findall(treatment_history.SELECTED_ROWS .== 1)
 
         for i in selected_rows
@@ -396,7 +398,10 @@ function combination_Window(treatment_history::DataFrame, combinationWindow::Day
         end
 
         treatment_history = selectRowsCombinationWindow!(treatment_history)
+        iteration_count += 1  # Increment the iteration counter
     end
+    return treatment_history
+end
     return treatment_history
 end
 
