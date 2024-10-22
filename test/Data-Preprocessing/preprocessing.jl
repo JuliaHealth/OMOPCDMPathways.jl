@@ -104,20 +104,17 @@ end
 @testset "create_treatment_history Tests" begin
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "startDate")
-    print(filtered_cohorts)
     @test size(filtered_cohorts, 1) == 0
 
 
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "endDate")
     @test size(filtered_cohorts, 1) == 0
-    print(filtered_cohorts)
 
 
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "wrongValue")
     @test size(filtered_cohorts, 1) == 0
-    print(filtered_cohorts)
 
 end
 
@@ -145,7 +142,6 @@ end
     combinationWindow = Day(5)  # A combination window allowing gaps up to 5 days
     
     df_transformed = combination_Window(df, combinationWindow)
-    println(df_transformed)
 
     @test size(df_transformed) == (4,6)
     
