@@ -104,23 +104,54 @@ end
 @testset "create_treatment_history Tests" begin
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "startDate")
-    print(filtered_cohorts)
     @test size(filtered_cohorts, 1) == 0
 
 
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "endDate")
     @test size(filtered_cohorts, 1) == 0
-    print(filtered_cohorts)
 
 
     cohorts = create_mock_cohorts()
     filtered_cohorts = create_treatment_history(cohorts, 1, [2, 3], 9200000, "wrongValue")
     @test size(filtered_cohorts, 1) == 0
-    print(filtered_cohorts)
 
 end
 
+
+function create_mock_cohorts_with_overlap()
+    return DataFrame(
+        event_start_date = [Date("2020-01-06"), Date("2020-01-15"), Date("2020-02-10"), Date("2020-02-22")],
+        event_end_date = [Date("2020-02-10"), Date("2020-02-05"), Date("2020-03-01"), Date("2020-03-10")],
+        event_cohort_id = ["B", "C", "D", "E"],
+        person_id = [1,1,1,1]
+    )
+end
+
+@testset "Combination with Overlap" begin
+    df = create_mock_cohorts_with_overlap()
+    df_expected = DataFrame(
+        event_start_date = [Date("2020-01-06"), Date("2020-01-15"), Date("2020-02-10"), Date("2020-02-22")],
+        event_end_date = [Date("2020-02-10"), Date("2020-02-10"), Date("2020-03-01"), Date("2020-03-01")],
+        event_cohort_id = ["B", "C", "D", "E"],
+        person_id = [1, 1, 1, 1],
+        GAP_PREVIOUS = [missing, -26, 0, -8],   # GAP_PREVIOUS values
+        SELECTED_ROWS = [0, 1, 0, 1]          # SELECTED_ROWS values
+    )
+    
+    combinationWindow = Day(5)  # A combination window allowing gaps up to 5 days
+    
+    df_transformed = combination_Window(df, combinationWindow)
+
+    @test size(df_transformed) == (4,6)
+    
+    # Test each column for equality
+    @test df_transformed.event_start_date == df_expected.event_start_date
+    @test df_transformed.event_end_date == df_expected.event_end_date
+    @test df_transformed.event_cohort_id == df_expected.event_cohort_id
+    @test df_transformed.person_id == df_expected.person_id
+    @test df_transformed.SELECTED_ROWS == df_expected.SELECTED_ROWS
+end
 
 @testset "minPostCombinationDuration_filter" begin
 
