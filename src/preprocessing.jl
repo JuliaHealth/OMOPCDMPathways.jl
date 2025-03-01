@@ -445,4 +445,79 @@ function minPostCombinationDuration_filter(df::DataFrame, minPostCombinationDura
     return filtered_df
 end
 
-export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, minPostCombinationDuration_filter, combination_Window
+
+"""
+    execute_treatments(
+        conn,
+        target_cohort_id::Int,
+        event_cohort_ids::Vector{Int};
+        min_era_duration::Int=30,
+        era_collapse_size::Int=30,
+        period_prior::Day=Day(365),
+        combination_window::Day=Day(30),
+        min_post_combination_duration::Int=30,
+        include_treatments::String="startDate"
+    ) -> DataFrame
+
+Executes a complete treatment pathway synthesis by orchestrating multiple data processing steps.
+
+# Arguments
+- `conn`: Database connection
+- `target_cohort_id::Int`: ID of the target cohort
+- `event_cohort_ids::Vector{Int}`: Vector of event cohort IDs to analyze
+
+# Optional Arguments
+- `min_era_duration::Int=30`: Minimum duration for an era to be considered valid
+- `era_collapse_size::Int=30`: Maximum gap size for collapsing eras
+- `period_prior::Day=Day(365)`: Time period to look back from index date
+- `combination_window::Day=Day(30)`: Window for combining overlapping treatments
+- `min_post_combination_duration::Int=30`: Minimum duration after combining treatments
+- `include_treatments::String="startDate"`: Strategy for including treatments
+
+# Returns
+- `DataFrame`: Processed treatment pathways with columns for person_id, event dates, and treatment information
+"""
+function execute_treatments(
+    conn,
+    target_cohort_id::Int,
+    event_cohort_ids::Vector{Int};
+    min_era_duration::Int=30,
+    era_collapse_size::Int=30,
+    period_prior::Day=Day(365),
+    combination_window::Day=Day(30),
+    min_post_combination_duration::Int=30,
+    include_treatments::String="startDate"
+)::DataFrame
+    
+    @assert !isempty(event_cohort_ids) "Event cohort IDs cannot be empty"
+    @assert include_treatments in ["startDate", "endDate"] "include_treatments must be either 'startDate' or 'endDate'"
+    
+    df_prior = period_prior_to_index(event_cohort_ids, conn; date_prior=period_prior)
+    df_duration = calculate_era_duration(df_prior, min_era_duration)
+    df_treatment = create_treatment_history(
+        df_duration,
+        target_cohort_id,
+        event_cohort_ids,
+        Dates.value(period_prior),
+        include_treatments
+    )
+    df_collapsed = EraCollapse(df_treatment, era_collapse_size)
+    df_combined = combination_Window(df_collapsed, combination_window)
+    df_final = minPostCombinationDuration_filter(df_combined, min_post_combination_duration)
+    
+    select!(df_final, [
+        :person_id,
+        :event_start_date,
+        :event_end_date,
+        :event_cohort_id,
+        :GAP_PREVIOUS,
+        :SELECTED_ROWS
+    ])
+    
+    sort!(df_final, [:person_id, :event_start_date])
+    
+    return df_final
+end
+
+
+export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, minPostCombinationDuration_filter, combination_Window, execute_treatments
