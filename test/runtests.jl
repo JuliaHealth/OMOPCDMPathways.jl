@@ -47,6 +47,7 @@ sql = translate(cohort, dialect=:sqlite, model=model,
 @testset "OMOPCDMPathways" begin
 	@testset "Data-Preprocessing" begin
 		include("Data-Preprocessing/preprocessing.jl")
+		include("Data-Preprocessing/execute_treatments.jl")
 	end
 end
 

@@ -249,7 +249,48 @@ function calculate_era_duration(treatment_history::DataFrame, minEraDuration)
 end
 
 
+"""
+```julia
+create_treatment_history(
+    current_cohorts::DataFrame,
+    targetCohortId::Int,
+    cohort_ids::Vector{Int},
+    periodPriorToIndex::Int,
+    includeTreatments::String,
+)
+```
+
+Restrict a set of event cohort eras to the members and observation window of a
+target cohort, producing the starting point for a treatment-history / pathway
+analysis.
+
+# Arguments
+
+- `current_cohorts::DataFrame` - one row per cohort era, with columns
+  `cohort_id`, `subject_id`, `cohort_start_date`, `cohort_end_date`. It must
+  contain **both** the target cohort (`cohort_id == targetCohortId`) and the
+  event cohorts (`cohort_id in cohort_ids`).
+- `targetCohortId::Int` - `cohort_id` of the target cohort.
+- `cohort_ids::Vector{Int}` - `cohort_id`s of the events (treatments) of interest.
+- `periodPriorToIndex::Int` - number of days before the target index date from
+  which an event era is still allowed to start.
+- `includeTreatments::String` - `"startDate"` (default behaviour) keeps an event
+  era when its **start** falls in `[index_date - periodPriorToIndex, target_end)`;
+  `"endDate"` tests the era's **end** instead and clips its start to
+  `index_date - periodPriorToIndex`.
+
+# Returns
+
+- A `DataFrame` of the event eras that survive the window filter, joined to their
+  subject's target era (target columns are suffixed `_1`), sorted by
+  `cohort_start_date`, `cohort_end_date`, with an added `index_year` and
+  `gap_same` (gap to the previous era) column.
+"""
 function create_treatment_history(current_cohorts::DataFrame, targetCohortId::Int, cohort_ids::Vector{Int}, periodPriorToIndex::Int, includeTreatments::String)
+
+    # `periodPriorToIndex` is a number of days; express it as a `Day` period so the
+    # subtraction is well defined when the cohort date columns are `Date`/`DateTime`.
+    priorOffset = periodPriorToIndex isa Dates.Period ? periodPriorToIndex : Day(periodPriorToIndex)
 
     # Add index year column based on start date of target cohort
     targetCohort = current_cohorts[in.(current_cohorts.cohort_id, Ref([targetCohortId])), :]
@@ -263,18 +304,18 @@ function create_treatment_history(current_cohorts::DataFrame, targetCohortId::In
     # Only keep event cohorts starting (startDate) or ending (endDate) after target cohort start date
     if includeTreatments == "startDate"
         current_cohorts = current_cohorts[
-            (current_cohorts.cohort_start_date_1 .- (periodPriorToIndex) .<= current_cohorts.cohort_start_date) .& 
+            (current_cohorts.cohort_start_date_1 .- priorOffset .<= current_cohorts.cohort_start_date) .&
             (current_cohorts.cohort_start_date .< current_cohorts.cohort_end_date_1), :]
-   
+
     elseif includeTreatments == "endDate"
         current_cohorts = current_cohorts[
-            (current_cohorts.cohort_start_date_1 .- (periodPriorToIndex) .<= current_cohorts.cohort_end_date) .& 
+            (current_cohorts.cohort_start_date_1 .- priorOffset .<= current_cohorts.cohort_end_date) .&
             (current_cohorts.cohort_start_date .< current_cohorts.cohort_end_date_1), :]
         current_cohorts.cohort_start_date = max.(
-            current_cohorts.cohort_start_date_1 .- (periodPriorToIndex), current_cohorts.cohort_start_date)
+            current_cohorts.cohort_start_date_1 .- priorOffset, current_cohorts.cohort_start_date)
     else
         current_cohorts = current_cohorts[
-            (current_cohorts.cohort_start_date_1 .- (periodPriorToIndex) .<= current_cohorts.cohort_start_date) .& 
+            (current_cohorts.cohort_start_date_1 .- priorOffset .<= current_cohorts.cohort_start_date) .&
             (current_cohorts.cohort_start_date .< current_cohorts.cohort_end_date_1), :]
     end
 
@@ -341,31 +382,40 @@ end
 
 
 """
-    combination_Window(treatment_history::DataFrame, min_post_combination_duration::Int)
+    combination_Window(treatment_history::DataFrame, combinationWindow::Day)
 
-Processes the `treatment_history` DataFrame to handle overlapping treatments by either combining them or switching between them based on their start and end dates. It aims to create a more accurate representation of a patient's treatment timeline by considering overlaps and adjusting treatment periods accordingly.
+Resolve overlapping treatment eras in `treatment_history` into *switches* or
+*combinations*, following the Switch / FRFS / LRFS logic of the OHDSI
+`TreatmentPatterns` package.
+
+For each pair of overlapping eras (of the same person):
+
+- if the overlap is shorter than `combinationWindow` (and not equal to the full
+  length of either era) it is a **Switch**: the earlier era's end date is pulled
+  back to the later era's start date;
+- otherwise the two eras are treated as a **combination** and the later era's end
+  date is aligned to the earlier era's end date (**FRFS** when the earlier era
+  ends first, **LRFS** when it ends last).
 
 # Arguments
-- `treatment_history::DataFrame`: A DataFrame containing treatment history data. It must have the columns `person_id`, `event_start_date`, `event_end_date`, and `event_cohort_id`.
-- `min_post_combination_duration::Int`: The minimum duration (in days) that a combined treatment period must have to be considered valid after processing overlaps.
-
-# Modifies
-- Updates the `event_start_date` and `event_end_date` columns to reflect the new start and end dates after combining overlapping treatments.
-- Updates the `event_cohort_id` column to reflect the new cohort IDs assigned after combining treatments.
-- Adds or updates the `duration_era` column, recalculating the duration of each treatment era based on the updated start and end dates.
+- `treatment_history::DataFrame`: must have the columns `person_id`,
+  `event_start_date`, `event_end_date` and `event_cohort_id`
+  (`event_start_date` / `event_end_date` must be `Date`).
+- `combinationWindow::Day`: minimum overlap for two eras to count as a
+  combination rather than a switch.
 
 # Returns
-- The modified `treatment_history` DataFrame with adjusted treatment periods and potentially reduced rows due to the combination of overlapping treatments.
+- The modified `treatment_history` with adjusted `event_end_date` values and the
+  `GAP_PREVIOUS` / `SELECTED_ROWS` bookkeeping columns added by
+  `selectRowsCombinationWindow!`.
 
 # Example
 ```julia
 using DataFrames, Dates
 treatment_history = DataFrame(person_id=[1, 1, 2], event_start_date=[Date(2020, 1, 1), Date(2020, 1, 10), Date(2020, 2, 1)], event_end_date=[Date(2020, 1, 5), Date(2020, 1, 15), Date(2020, 2, 5)], event_cohort_id=[101, 102, 201])
-combination_Window(treatment_history, 5)
+combination_Window(treatment_history, Day(5))
 ```
 """
-
-
 function combination_Window(treatment_history::DataFrame, combinationWindow::Day)
     treatment_history = selectRowsCombinationWindow!(treatment_history)
     selected_row_count = count(x -> x == 1, treatment_history.SELECTED_ROWS)  # Count rows with SELECTED_ROWS == 1
@@ -445,4 +495,228 @@ function minPostCombinationDuration_filter(df::DataFrame, minPostCombinationDura
     return filtered_df
 end
 
-export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, minPostCombinationDuration_filter, combination_Window
+
+# Coerce whatever a cohort table returns for a date column into a `Date`.
+_as_date(x::Date) = x
+_as_date(x::DateTime) = Date(x)
+_as_date(x::AbstractString) = Date(first(strip(x), 10))
+_as_date(x::Missing) = missing
+
+"""
+    query_cohorts_with_dates(conn, cohort_ids::Vector{Int}; tab = cohort)
+
+Fetch every row of the `cohort` table whose `cohort_definition_id` is in
+`cohort_ids` and return a `DataFrame` with the columns
+`cohort_id`, `subject_id`, `cohort_start_date`, `cohort_end_date`.
+
+Unlike [`period_prior_to_index`](@ref) this helper keeps the `cohort_end_date`
+column and does **not** shift any dates — the `periodPriorToIndex` offset is
+applied later (against the *target* cohort's index date) by
+[`create_treatment_history`](@ref). The returned frame contains both the target
+cohort and the event cohorts and is the `current_cohorts` input expected by
+`create_treatment_history`.
+
+The two date columns are coerced to `Date`, and `cohort_id`/`subject_id` to
+`Int`, so the result has a stable schema regardless of how the backing database
+stores cohort dates (ISO strings, `DATE`, or epoch values).
+"""
+function query_cohorts_with_dates(conn, cohort_ids::Vector{Int}; tab = cohort)
+    sql = From(tab) |>
+        Where(Fun.in(Get.cohort_definition_id, cohort_ids...)) |>
+        Select(Get.cohort_definition_id, Get.subject_id, Get.cohort_start_date, Get.cohort_end_date) |>
+        q -> render(q, dialect = dialect)
+
+    df = DBInterface.execute(conn, String(sql)) |> DataFrame
+
+    @assert nrow(df) > 0 "No cohort rows found for cohort ids $(cohort_ids)"
+
+    rename!(df, :cohort_definition_id => :cohort_id)
+    df.cohort_id = convert.(Int, df.cohort_id)
+    df.subject_id = convert.(Int, df.subject_id)
+    df.cohort_start_date = _as_date.(df.cohort_start_date)
+    df.cohort_end_date = _as_date.(df.cohort_end_date)
+
+    return df
+end
+
+"""
+    execute_treatments(
+        conn,
+        target_cohort_id::Int,
+        event_cohort_ids::Vector{Int};
+        min_era_duration::Int = 30,
+        era_collapse_size::Int = 30,
+        period_prior::Day = Day(365),
+        combination_window::Day = Day(30),
+        min_post_combination_duration::Int = 30,
+        include_treatments::String = "startDate",
+    ) -> DataFrame
+
+Run a full treatment-pathway synthesis for a `target_cohort_id` and a set of
+`event_cohort_ids`, following the OHDSI `TreatmentPatterns` `constructPathways`
+pipeline. This is a *sewing* function: it stitches together the pre-processing
+primitives of this package in the right order and with a consistent column
+contract.
+
+# Pipeline
+
+1. [`query_cohorts_with_dates`](@ref) pulls the target + event cohort eras from
+   the `cohort` table in one `DataFrame`.
+2. [`create_treatment_history`](@ref) restricts the event eras to the target
+   cohort's members and to the observation window
+   `[index_date - period_prior, target_cohort_end)` (`include_treatments`
+   selects whether the event's start or end date is used for that test), and
+   renames the columns to the `person_id` / `event_start_date` / `event_end_date`
+   / `event_cohort_id` contract.
+3. [`calculate_era_duration`](@ref) drops eras shorter than `min_era_duration`
+   days (`minEraDuration`).
+4. [`EraCollapse`](@ref) collapses eras of the same treatment separated by a gap
+   `> era_collapse_size` days (`eraCollapseSize`) to the first era. It is applied
+   per `(person, event_cohort_id)` so eras of different treatments are never
+   dropped against each other.
+5. [`combination_Window`](@ref) resolves overlapping eras into switches or
+   combinations using `combination_window` (`combinationWindow`, Switch / FRFS /
+   LRFS logic).
+6. [`minPostCombinationDuration_filter`](@ref) drops the short single-treatment
+   fragments left around a generated combination
+   (`min_post_combination_duration` days).
+
+# Arguments
+- `conn`: database connection (e.g. an `SQLite.DB`) that has a `cohort` table.
+- `target_cohort_id::Int`: `cohort_definition_id` of the target cohort.
+- `event_cohort_ids::Vector{Int}`: `cohort_definition_id`s of the treatments of
+  interest.
+
+# Keyword arguments
+- `min_era_duration::Int = 30`: minimum era length, in days.
+- `era_collapse_size::Int = 30`: maximum gap, in days, for collapsing two eras of
+  the same treatment.
+- `period_prior::Day = Day(365)`: how far before the index date a treatment may
+  start and still be included.
+- `combination_window::Day = Day(30)`: minimum overlap for two eras to be treated
+  as a combination rather than a switch.
+- `min_post_combination_duration::Int = 30`: minimum length, in days, of a
+  single-treatment fragment kept next to a combination.
+- `include_treatments::String = "startDate"`: `"startDate"` or `"endDate"` —
+  which date of an event era is tested against the observation window.
+
+# Returns
+A `DataFrame` sorted by `person_id`, `event_start_date` with columns:
+
+| column | meaning |
+|:--|:--|
+| `person_id` | subject identifier |
+| `event_start_date` | era start (`Date`) |
+| `event_end_date` | era end (`Date`) after switch/combination adjustment |
+| `event_cohort_id` | `cohort_definition_id` of the treatment |
+| `GAP_PREVIOUS` | days between this era's start and the previous era's end for the same person (`missing` for the first era) |
+| `SELECTED_ROWS` | `1` if the era still overlaps the previous one, else `0` |
+
+# Example
+
+```julia
+using OMOPCDMPathways, SQLite, DataFrames, Dates
+import DBInterface
+
+conn = SQLite.DB("eunomia.sqlite")
+MakeTables(conn, :sqlite, "main")   # sets up the internal `cohort` / `dialect` bindings
+
+pathways = execute_treatments(
+    conn,
+    1,                       # target cohort
+    [2, 3];                  # event cohorts
+    min_era_duration = 5,
+    combination_window = Day(30),
+    min_post_combination_duration = 30,
+)
+
+first(pathways, 5)
+```
+"""
+function execute_treatments(
+    conn,
+    target_cohort_id::Int,
+    event_cohort_ids::Vector{Int};
+    min_era_duration::Int = 30,
+    era_collapse_size::Int = 30,
+    period_prior::Day = Day(365),
+    combination_window::Day = Day(30),
+    min_post_combination_duration::Int = 30,
+    include_treatments::String = "startDate",
+)::DataFrame
+
+    @assert !isempty(event_cohort_ids) "Event cohort IDs cannot be empty"
+    @assert include_treatments in ["startDate", "endDate"] "include_treatments must be either 'startDate' or 'endDate'"
+
+    empty_result() = DataFrame(
+        person_id = Int[],
+        event_start_date = Date[],
+        event_end_date = Date[],
+        event_cohort_id = Int[],
+        GAP_PREVIOUS = Union{Int64, Missing}[],
+        SELECTED_ROWS = Int[],
+    )
+
+    # 1. Target + event cohort eras, one frame, dates kept, nothing shifted.
+    raw_cohorts = query_cohorts_with_dates(conn, Int[target_cohort_id; event_cohort_ids...])
+
+    # 2. periodPriorToIndex + observation-window filtering against the target cohort.
+    df = create_treatment_history(
+        raw_cohorts,
+        target_cohort_id,
+        event_cohort_ids,
+        Dates.value(period_prior),
+        include_treatments,
+    )
+    isempty(df) && return empty_result()
+
+    # Normalise to the treatment-history column contract. Keep the `Date` columns
+    # (needed by `combination_Window`) and add an epoch-day view of the same eras
+    # (needed by `calculate_era_duration` / `EraCollapse`, which compare against
+    # plain `Int` day counts).
+    rename!(df,
+        :subject_id => :person_id,
+        :cohort_id => :event_cohort_id,
+        :cohort_start_date => :event_start_date,
+        :cohort_end_date => :event_end_date,
+    )
+    df.drug_exposure_start = Dates.value.(df.event_start_date)
+    df.drug_exposure_end = Dates.value.(df.event_end_date)
+
+    # 3. minEraDuration, then 4. eraCollapseSize.
+    df = calculate_era_duration(df, min_era_duration)
+    isempty(df) && return empty_result()
+    # `EraCollapse` compares each era against the previous *row*, so run it per
+    # (person, treatment) group: `eraCollapseSize` is about gaps between eras of
+    # the *same* treatment, and this keeps one person's / treatment's eras from
+    # being collapsed against another's.
+    df = combine(groupby(df, [:person_id, :event_cohort_id])) do sdf
+        EraCollapse(select(DataFrame(sdf), Not([:person_id, :event_cohort_id])), era_collapse_size)
+    end
+    isempty(df) && return empty_result()
+
+    # 5. combinationWindow (Switch / FRFS / LRFS) on the `Date` columns.
+    df = combination_Window(df, combination_window)
+
+    # 6. minPostCombinationDuration.
+    df.duration_era = Dates.value.(df.event_end_date .- df.event_start_date)
+    df = minPostCombinationDuration_filter(df, min_post_combination_duration)
+
+    isempty(df) && return empty_result()
+
+    # 7. Final projection.
+    select!(df, [
+        :person_id,
+        :event_start_date,
+        :event_end_date,
+        :event_cohort_id,
+        :GAP_PREVIOUS,
+        :SELECTED_ROWS,
+    ])
+    sort!(df, [:person_id, :event_start_date])
+
+    return df
+end
+
+
+export create_treatment_history, calculate_era_duration, EraCollapse, period_prior_to_index, minPostCombinationDuration_filter, combination_Window, execute_treatments, query_cohorts_with_dates
